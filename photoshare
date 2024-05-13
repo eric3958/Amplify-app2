@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Upload and Download</title>
+</head>
+<body>
+
+<h1>Image Upload</h1>
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="fileInput" name="fileInput" accept="image/*">
+    <button type="submit">Upload</button>
+</form>
+
+<h1>Image Download</h1>
+<a id="downloadLink" href="#" download="downloaded_image.jpg">Download Image</a>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+    try {
+        const response = await fetch('s3://esmdlol/upload/', { // Replace YOUR_S3_UPLOAD_URL with your S3 upload URL
+            method: 'POST',
+            body: formData
+        });
+        if (response.ok) {
+            console.log('Image uploaded successfully');
+        } else {
+            console.error('Failed to upload image:', response.statusText);
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+    }
+});
+
+document.getElementById('downloadLink').addEventListener('click', async function(event) {
+    event.preventDefault();
+    try {
+        const response = await fetch('s3://esmdlol/upload/', { // Replace YOUR_S3_DOWNLOAD_URL with your S3 download URL
+            method: 'GET'
+        });
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'downloaded_image.jpg');
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+    } catch (error) {
+        console.error('Error downloading image:', error);
+    }
+});
+</script>
+
+</body>
+</html>
